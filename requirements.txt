@@ -1,0 +1,25 @@
+# CNC Tool Wear Prediction & Scrap Risk Signal System
+# Pinned to the exact versions this codebase was built and integration-tested against.
+# Python 3.12+ required.
+
+# --- Core data / ML ---
+numpy==2.4.4
+pandas==3.0.2
+scikit-learn==1.8.0
+xgboost==3.3.0
+lightgbm==4.7.0
+joblib==1.5.3
+
+# --- Explainable AI ---
+shap==0.52.0
+
+# --- Dashboard ---
+streamlit==1.60.0
+plotly==6.9.0
+
+# --- Generative AI Narrative Agent (Azure OpenAI) ---
+openai==2.50.0
+python-dotenv==1.2.2
+
+# --- PDF report export ---
+reportlab==4.4.10

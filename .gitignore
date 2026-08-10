@@ -1,0 +1,29 @@
+# Environment / secrets
+.env
+*.env.local
+
+# Generated data & model artifacts (regenerate via `python train_pipeline.py`)
+data/
+artifacts/
+exports/
+*.joblib
+
+# PDF / CSV exports produced at runtime
+*.pdf
+!docs/**/*.pdf
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS / editor cruft
+.DS_Store
+.vscode/
+.idea/
