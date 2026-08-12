@@ -58,7 +58,7 @@ from shap_engine import explain_scrap_risk, explain_wear_prediction
 # Page config + theme
 # ---------------------------------------------------------------------------
 st.set_page_config(
-    page_title="CNC Tool Wear & Scrap Risk Signal System",
+    page_title="CNC SENTINEL - A CNC Tool Wear & Scrap Risk Signal System",
     page_icon="⚙️",
     layout="wide",
     initial_sidebar_state="collapsed",
