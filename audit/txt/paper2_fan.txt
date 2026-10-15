@@ -1,0 +1,556 @@
+
+
+===== PAGE 1 =====
+A CNC Machine Tool Wear Prediction Model 
+Integrating Deep Reinforcement Learning and Edge 
+Data Processing 
+Zhenduo Fan 
+Heilongjiang Polytechnic, Harbin, Heilongjiang, 150080, China 
+fan1988_05@163.com 
+ 
+ 
+Abstract—This paper proposes a CNC machine tool wear 
+prediction model integrating deep reinforcement learning and 
+edge data processing, with attention-enhanced lightweight deep 
+reinforcement learning (A-LWDRL) algorithm at its core. The 
+model adopts a four-layer architecture: edge data preprocessing, 
+attention feature extraction, lightweight DRL prediction, and 
+edge-cloud collaborative optimization, with over 90% of the 
+computational tasks completed at the edge. Adaptive noise 
+reduction of industrial signals is achieved through a sliding 
+window-based dynamic noise suppression algorithm, key 
+features are selected using a time -series-channel dual -
+dimensional attention mechanism, a lightweight network is 
+constructed using depthwise separable convolution and inverted 
+residual structures, and a dynamic hierarchical reward 
+mechanism optimizes the model's convergence performance. 
+Experimental verification shows that the model achieves mean 
+absolute errors as low as 0.023mm and 0.028mm on the PHM 
+2010 public dataset and the actual cutting dataset of 45# steel, 
+respectively, with a wear level accuracy of 98.7%. The model has 
+a storage capacity of only 2.3MB, a prediction latency of 12.8ms, 
+and CPU and GPU utilization rates of 28% and 42%, 
+respectively. Compared with traditional benchmark models 
+such as DQN and LSTM, the prediction accuracy is improved 
+by 23.4% -32.4%, and the parameter size is reduced by more 
+than 89.7%. It effectively balances prediction accuracy, real -
+time performance, and edge resource adaptability, providing an 
+efficient technical solution for online monitoring of CNC 
+machine tool wear. 
+Keywords—CNC machine tool , tool wear prediction , deep 
+reinforcement learning , edge computing, attention mechanism, 
+lightweight network, edge-cloud collaboration 
+I. INTRODUCTION 
+As the core equipment of intelligent manufacturing, the 
+tool wear state of CNC machine tools directly determines 
+machining accuracy, production efficiency, and operational 
+safety. Progressive wear of cutting  tools during the cutting 
+process leads to workpiece dimensional deviations and 
+surface quality degradation, and in severe cases, tool 
+breakage and equipment downtime. Statistics show that tool 
+failure accounts for over 35% of production line malfunctions, 
+causing significant economic losses. With the deepening 
+advancement of Industry 4.0 and intelligent manufacturing, 
+the requirements for real -time and accurate tool condition 
+monitoring in production lines have increased dramatically 
+[1]. Traditional offline monitoring and periodic replacement 
+methods can no longer meet the needs of flexible production, 
+necessitating the construction of an efficient online wear 
+prediction system. 
+The widespread adoption of edge computing technology 
+provides a new technological path for real-time monitoring of 
+industrial equipment [2]. By processing data locally at the 
+data generation point, it effectively reduces cloud 
+transmission latency and bandwidth consumption, adapting 
+to the real-time decision-making needs of CNC machine tools. 
+Current tool wear prediction methods mainly fall into three 
+categories: physical models, which construct wear evolution 
+equations based on cutting mechanics principles, suffer from 
+poor adaptability to complex working conditions and limited 
+generalization ability; machine learning models (such as 
+SVM and random forest) rely on manual feature engineering, 
+resulting in insufficient fitting accuracy for nonlinear wear 
+processes; and deep learning models (such as LSTM and 
+CNN), while capable of autom atically extracting features, 
+have large parameter scales, high computational 
+requirements, and are difficult to deploy on resource-
+constrained edge nodes. 
+In recent years, Deep Reinforcement Learning (DRL) has 
+gradually been applied to industrial prediction due to its 
+advantages in temporal decision-making tasks [3]. However, 
+existing fusion schemes still face significant bottlenecks: first, 
+the complex DRL network structure and parameter 
+redundancy make it difficult for edge nodes to support 
+computational power, leading to prediction delays exceeding 
+the threshold of industrial scenarios; second, vibration and 
+cutting force signals in industrial environments contain a 
+large amount of non- stationary noise, and existing 
+preprocessing methods cannot a daptively suppress 
+interference, affecting feature extraction accuracy; and third, 
+traditional DRL reward mechanisms are simplistic and 
+difficult to adapt to the multi -stage evolution characteristics 
+of tool wear, resulting in slow model convergence and la rge 
+prediction errors  [4]. These problems severely restrict the 
+practical application of DRL combined with edge data 
+processing in tool wear prediction. To address the 
+aforementioned challenges, this paper proposes a CNC 
+machine tool wear prediction model that integrates deep 
+reinforcement learning and edge data processing. The core 
+innovation is the Attention -Enhanced Lightweight Deep 
+Reinforcement Learning (A -LWDRL) algorithm  [5]. This 
+model suppresses noise interference through an adaptive edge 
+data preprocessing module, selects key features based on an 
+attention mechanism, adopts a lightweight network structure 
+to adapt to edge resource constraints, and designs a dynamic 
+hierarchical reward mechanism to optimize model 
+convergence performance. Simultaneously, an edge -cloud 
+collaborative architecture is constructed to achieve efficient 
+iteration of model parameters and real -time inference  [6]. 
+Experimental results show that this model significantly 
+105
+2026 International Conference on Digital Analysis and Processing, Intelligent Computation (DAPIC)
+© 2026, copyrighted by The Academy of Engineering and Education.
+DOI 10.23919/DAPIC.2026.00023
+Authorized licensed use limited to: Vasavi College of Engineering. Downloaded on August 11,2026 at 07:49:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+===== PAGE 2 =====
+reduces edge resource consumption and inference latency 
+while maintaining prediction accuracy, providing a new 
+technical solution for online monitoring of CNC machine tool 
+wear. 
+II. OVERALL PREDICTION MODEL ARCHITECTURE AND 
+ALGORITHM DESIGN 
+A. Overall Model Framework 
+The model employs a four -layer collaborative 
+architecture to achieve a deep fusion of efficient data 
+processing and accurate prediction at the edge. The edge data 
+preprocessing layer is deployed on the local edge node of the 
+CNC machine tool, performing real-time noise reduction and 
+standardization on the raw vibration and cutting force signals; 
+the attention feature extraction layer focuses on wear-related 
+features, filtering redundant information to reduce 
+computational overhead; the lightweight DRL prediction 
+layer completes time-series prediction of wear amount based 
+on optimized features; the edge -cloud collaborative 
+optimization layer balances real- time performance and 
+prediction accuracy through a closed -loop mechanism of 
+cloud-initialized model parameters, online iterative training 
+at the edge, and periodic parameter feedback from the cloud 
+[7]. Data flow follows the logic of "acquisition - 
+preprocessing - feature selection - prediction - optimization," 
+with over 90% of computational tasks completed at the edge, 
+and only key parameter updates relying on cloud interaction. 
+B. Attention-Enhanced Lightweight Deep Reinforcement 
+Learning (A-LWDRL) 
+1) Adaptive Edge Data Preprocessing Module 
+To address the issues of non -stationarity and noise 
+interference in industrial signals, a dynamic noise 
+suppression algorithm based on a sliding window is designed 
+[8]. The sliding window size is defined as 𝑁𝑁 . The 
+signal 𝑥𝑥𝑖𝑖(𝑖𝑖 = 1,2, … , 𝑁𝑁) within the window undergoes 
+adaptive threshold filtering, with the threshold λ dynamically 
+adjusted according to signal fluctuations: 
+𝜆𝜆 = 𝛼𝛼 ⋅ median(|𝑥𝑥𝑖𝑖 − 𝜇𝜇|) + 𝛽𝛽 ⋅ 𝜎𝜎                (1) 
+where 𝜇𝜇 is the mean of the signal within the window, 𝜎𝜎 is 
+the standard deviation, and 𝛼𝛼, 𝛽𝛽  are adaptive adjustment 
+coefficients (optimized to 0.85 and 0.32 through training with 
+industrial scenario data). The filtered signal is then 
+standardized: 
+𝑥𝑥𝑖𝑖′ = 𝑥𝑥𝑖𝑖−𝜇𝜇𝜎𝜎+𝜖𝜖 ⋅ 𝛾𝛾 + 𝛿𝛿                                      (2) 
+𝜖𝜖 is used to prevent the denominator from being zero 
+(taken as 10−6), and 𝛾𝛾, 𝛿𝛿 are scaling and offset coefficients  
+[9]. This module does not require a preset fixed threshold, can 
+adapt to signal fluctuations in industrial scenarios, improves 
+noise reduction efficiency by more than 30% compared to 
+traditional methods, and has a computational complexity of 
+only 𝑂𝑂(𝑁𝑁), adap ting to the real -time processing needs of 
+edge nodes. 
+2) Attention-Guided Feature Selection Mechanism 
+A time -series-channel dual- dimensional attention 
+mechanism is constructed. First, the preprocessed signal is 
+converted into a feature matrix 𝐹𝐹 ∈ ℝ 𝐶𝐶×𝑇𝑇( 𝐶𝐶 is the number of 
+feature channels, 𝑇𝑇 is the time step). Key features are focused 
+through attention weight calculation: 
+𝜔𝜔𝑐𝑐,𝑡𝑡 =
+exp �MLP�Conv�𝐹𝐹𝑐𝑐,𝑡𝑡���
+∑  𝐶𝐶𝑐𝑐=1  ∑  𝑇𝑇𝑡𝑡=1  exp �MLP�Conv�𝐹𝐹𝑐𝑐,𝑡𝑡���                  (3) 
+Where Conv is a 1×3 lightweight convolution, and MLP 
+is a single -hidden-layer perceptron. The filtered feature 
+matrix is: 
+𝐹𝐹′ = 𝐹𝐹 ⊙ 𝜔𝜔 + Res(𝐹𝐹)                                (4) 
+(⊙ represents element -wise multiplication, and Res(𝐹𝐹)  
+represents residual connections to preserve original feature 
+information [10]. This mechanism allows the model to focus 
+on high-frequency vibration features and abrupt changes in 
+cutting force that are strongly correlated with wear, 
+compressing the feature dimension by more than 60% and 
+significantly reducing subsequent computational overhead.) 
+3) Lightweight DRL Network Structure 
+A lightweight DRL network is designed based on 
+depthwise separable convolution and inverted residual 
+structures. The core of network parameter compression is 
+achieved through a bottleneck layer: Let the input feature 
+dimension be 𝑑𝑑in, the bottleneck layer dimension be 𝑑𝑑𝑏𝑏, and 
+the expansion coefficient be 𝑡𝑡. Then the feature expansion 
+and compression process satisfies: 
+𝑑𝑑exp = 𝑡𝑡 ⋅ 𝑑𝑑𝑏𝑏, 𝑑𝑑out =
+𝑑𝑑exp
+𝑡𝑡                              (5) 
+𝑡𝑡  is set to 1.5 to balance feature representation and 
+computational efficiency. The policy network of the DRL 
+network uses depthwise separable convolutions instead of 
+traditional convolutions, reducing the computational cost 
+to
+1
+𝐶𝐶 +
+1
+𝐾𝐾2  of a traditional CNN (where 𝐶𝐶  is the number of 
+channels and , 𝐾𝐾  is the kernel size). The value network 
+further reduces redundancy by sharing feature extraction 
+layer parameters, keeping the overall model parameter size 
+within 2.3 MB to meet edge node storage constraints. 
+4) Dynamic Hierarchical Reward Mechanism 
+A multi-stage reward function is designed to adapt to the 
+tool wear evolution characteristics. The total reward 𝑅𝑅 
+consists of three parts: 
+𝑅𝑅 = 𝑅𝑅𝑝𝑝 + 𝑅𝑅𝑑𝑑 + 𝑅𝑅𝑐𝑐                                   (6) 
+The reward for accurate prediction is 𝑅𝑅𝑝𝑝 = exp �−
+|𝑤𝑤ˆ −𝑤𝑤|
+𝜃𝜃 � 
+(where 𝑤𝑤ˆ   is the predicted wear amount, 𝑤𝑤 is the actual value, 
+and 𝜃𝜃 is the reward decay coefficient); the penalty for delay 
+is 𝑅𝑅𝑑𝑑 = −𝜂𝜂 ⋅ 𝜏𝜏 (where 𝜏𝜏 is the prediction delay and 𝜂𝜂 is the 
+penalty coefficient); and the  reward for error correction is  
+𝑅𝑅𝑐𝑐 = 𝜁𝜁 ⋅ max�0, 𝜖𝜖prev − 𝜖𝜖curr � (where �𝜖𝜖prev  ,  𝜖𝜖curr  are the 
+prediction errors between the two predictions, and (are the 
+correction reward coefficients). This mechanism improves 
+the model convergence speed by 37% by positively 
+incentivizing accurate prediction, penalizing delayed 
+response, and encouraging error correction. 
+106
+Authorized licensed use limited to: Vasavi College of Engineering. Downloaded on August 11,2026 at 07:49:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+===== PAGE 3 =====
+C. Model Training and Inference Process 
+During the training phase, the A -LWDRL algorithm 
+parameters are first initialized via a cloud server, including 
+convolutional kernel weights, attention mechanism 
+parameters, and initial values for the  DRL network. Edge 
+nodes collect sensor signals in real time, and after 
+preprocessing and feature selection, online training is 
+performed based on a dynamic hierarchical reward 
+mechanism, updating the network parameters every 100 time 
+steps. The cloud receives training logs and parameter 
+gradients uploaded by the edge nodes hourly, optimizes and 
+adjusts global parameters through batch data, and feeds this 
+optimization back to the edge nodes, achieving iterative 
+parameter optimization  [11]. During the infere nce phase, 
+edge nodes directly load the optimized model, perform real -
+time prediction of the preprocessed features, and output tool 
+wear amount and wear level. The inference latency is 
+controlled within 13 ms, meeting the real -time monitoring 
+requirements of industry. 
+III. EXPERIMENTAL SIMULATION AND RESULT ANALYSIS 
+A. Experimental Environment Setup 
+The core of the hardware platform is an NVIDIA Jetson 
+Xavier NX edge node, configured with an 8- core ARM 
+Cortex-A78 CPU, a 384 -core CUDA GPU, 8GB LPDDR5 
+memory, and 16GB eMMC storage to meet the lightweight 
+computing requirements of the edge. The CNC machine tool 
+used is a FANUC 0i-MF vertical machining center, equipped 
+with a PCB 356A16 three-axis vibration sensor and a Kistler 
+9257B piezoelectric cutting force sensor [12]. The former has 
+a measurement range of ±50g and a sensitivity of 100mV/g, 
+while the latter has a range of 0 -50kN and a nonlinear error 
+of less than 0.5%, ensuring signal acquisition accuracy. The 
+software environment is built on Python 3.9, using PyTor ch 
+1.18 as the deep learning framework. TensorRT 8.4 is used 
+for model quantization acceleration. Data processing relies 
+on NumPy 1.24 and Pandas 2.0. Simulation visualization uses 
+Matplotlib 3.7. All experiments were performed in a unified 
+environment to ensure the comparability of results. 
+B. Dataset Design and Preprocessing 
+ The experiment employed dual validation using both 
+publicly available and real -world datasets. The publicly 
+available dataset was the PHM 2010 Tool Wear Challenge 
+dataset, containing 5 different combinations of cutting 
+parameters and full lifecycle data of 3 WC -Co tools cutting 
+Inconel 718 alloy. The wear range was 0- 0.21 mm, with a 
+sampling frequency of 5 kHz. After screening, the effective 
+sample size was 8600 sets  [13]. The real -world dataset 
+focused on the cutting scenario of 45# steel, using 3 identical 
+WC-Co carbide tools at a fixed cutting speed of 120 m/min, 
+feed rate of 0.15 mm/r, and depth of cut of 3 mm. Cutting 
+continued until the wear reached 0.2 mm, with a sampling 
+frequency of 1 kHz. A total of 12000 data sets were collected, 
+covering vibration acceleration, triaxial cutting force signals, 
+and corresponding tool wear (measured using an optical 
+microscope with an accuracy of 0.001 mm). The data 
+preprocessing workflow includes : removing outliers using 
+the 3σ criterion; mapping the data to the [0,1] interval using 
+Min-Max normalization; generating time -series samples 
+using sliding window segmentation (window size 1024, step 
+size 256); dividing the public dataset into training and test 
+sets in a 7:3 ratio; and dividing the actual dataset in an 8:2 
+ratio to ensure training effectiveness and validation reliability. 
+C. Evaluation Indicators Selection 
+The experiment selected five core evaluation indicators to 
+comprehensively measure mode l performance: Mean 
+Absolute Error (MAE) quantifies the average deviation 
+between predicted and true values, reflecting overall 
+prediction accuracy; Root Mean Square Error (RMSE) 
+amplifies the impact of deviation through squared variance, 
+highlighting the interference of large errors on model 
+performance; Prediction Latency refers to the total time taken 
+for a single sample from input to output, directly related to 
+the feasibility of real- time applications at the edge; Model 
+Storage Capacity is the size of the model file after TensorRT 
+quantization, reflecting the storage adaptability of edge nodes; 
+Wear Level Accuracy divides wear into three categories: 
+initial (0 -0.05mm), intermediate (0.05 -0.15mm), and final 
+(0.15-0.2mm), evaluating the model's classification and 
+decision-making capabilities in actual production scenarios. 
+D. Comparative and Ablation Experiment Design 
+The comparative experiments selected five representative 
+benchmark models: the traditional machine learning model 
+SVM (using radial basis funct ion kernel), the classic deep 
+learning temporal model LSTM (3 hidden layers, 128 
+neurons), the hybrid deep learning model CNN-LSTM (CNN 
+extracts spatial features combined with LSTM to capture 
+temporal dependencies), the traditional deep reinforcement 
+learning model DQN (original network structure), and the 
+lightweight benchmark model CNN+MLP (depthseparable 
+convolutions combined with multilayer perceptrons). All 
+models were trained and optimized using the same 
+hyperparameter range to ensure fairness in the comparison  
+[14]. The ablation experiment design included three model 
+variants: A-LWDRL with the attention module removed, A-
+LWDRL with the dynamic reward mechanism removed, and 
+A-LWDRL without lightweighting. By comparing with the 
+complete model, the independent contributions of the 
+attention-guided feature selection mechanism, the dynamic 
+hierarchical reward mechanism, and the lightweight network 
+structure were verified. 
+E. Experimental Results and Analysis 
+The quantitative experimental results are shown in Table 
+I. The proposed A -LWDRL model exhibits the best overall 
+performance on both datasets: on the public dataset, the mean 
+absolute error is 0.023 mm and the root mean square error is 
+0.031 mm, which are 32.4% and 28.4% lower than the 
+traditional DQN, resp ectively; on the real dataset, the mean 
+absolute error is 0.028 mm and the root mean square error is 
+0.036 mm, which are 26.3% and 23.4% higher than CNN -
+LSTM, respectively. Meanwhile, the model's storage 
+capacity is only 2.3 MB, a compression of 89.7% compared 
+to LSTM, and the prediction latency is as low as 12.8 ms, 
+fully meeting the real-time monitoring requirements of edge 
+devices [15]. The wear level accuracy reaches 98.7%, 
+significantly better than all benchmark models, verifying the 
+algorithm's ability to balance accuracy and lightweight design. 
+The ablation experiment results are shown in Table II. 
+After removing the attention module, the model's mean 
+absolute error improved to 0.031 mm, indicating that the 
+attention mechanism can effectively filter k ey features 
+strongly correlated with wear and reduce redundant 
+information interference. After removing the dynamic reward 
+mechanism, the number of model convergence iterations 
+increased to 14,100, a 37% decrease compared to the 
+107
+Authorized licensed use limited to: Vasavi College of Engineering. Downloaded on August 11,2026 at 07:49:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+===== PAGE 4 =====
+complete model, verifying the important role of the dynamic 
+hierarchical reward mechanism in accelerating model 
+convergence [16]. The storage capacity of the model without 
+lightweight processing increased to 17.4 MB, and the 
+prediction latency reached 27.5 ms, proving that lightweight 
+network design is the core guarantee for adapting to edge 
+node resource constraints, and the syner gistic effect of 
+various innovative modules achieved an overall improvement 
+in model performance. 
+TABLE I.  COMPARISON OF QUANTITATIVE PERFORMANCE OF VARIOUS MODELS 
+Model Public datasets Real dataset Prediction 
+delay (ms) 
+Model storage 
+capacity (MB) 
+Wear level 
+accuracy (%) Mean absolute 
+error (mm) 
+Root mean 
+square error 
+(mm) 
+Mean absolute 
+error (mm) 
+Root mean 
+square error 
+(mm) 
+SVM 0.057 0.072 0.063 0.079 8.5 0.8 82.3 
+LSTM 0.038 0.049 0.038 0.047 28.6 21.8 92.5 
+CNN-LSTM 0.035 0.047 0.038 0.047 22.3 18.5 94.1 
+Traditional DQN 0.034 0.043 0.039 0.048 31.2 19.6 93.8 
+CNN+MLP 0.032 0.041 0.036 0.045 15.7 3.2 95.6 
+A-LWDRL (This 
+Article) 
+0.023 0.031 0.028 0.036 12.8 2.3 98.7 
+TABLE II.  ABLATION EXPERIMENT PERFORMANCE COMPARISON 
+Model variants Mean absolute 
+error (mm) 
+Root mean square 
+error (mm) 
+Prediction delay 
+(ms) 
+Model storage 
+capacity (MB) 
+Convergence 
+iterations 
+A-LWDRL (Complete Model) 0.023 0.031 12.8 2.3 8600 
+Remove attention module 0.031 0.04 11.5 2.1 8800 
+Remove dynamic reward mechanism 0.027 0.035 12.6 2.3 14100 
+Not lightweight 0.024 0.032 27.5 17.4 9200 
+Simulation Figure 1 shows the convergence curves of 
+each model. The horizontal axis represents the number of 
+iterations (0-20000), and the vertical axis represents the loss 
+value [17]. It can be seen that A -LWDRL reaches a stable 
+convergence state after 8600 iterations, which is 4500 
+iterations earlier than the traditional DQN. The dynamic 
+hierarchical reward mechanism effectively accelerates the 
+convergence process. 
+ 
+Figure 1. Convergence curves of each model. 
+Figure 2 shows the tool wear prediction curves. The 
+horizontal axis represents cutting time (0 -300 min), and the 
+vertical axis represents wear amount. The model in this paper 
+has the highest degree of fit with the actual value. In 
+particular, the prediction fluctuation in the middle of the wear 
+(0.05-0.15 mm) is significantly smaller than that of other 
+models, demonstrating stronger time series prediction ability. 
+Figure 3 shows the variation of mean absolute error under 
+different cutting speeds. The horizontal axis represents the 
+cutting speed (80-160m/min), and the vertical axis represents 
+the mean absolute error. The error fluctuation of A-LWDRL 
+is less than 0.005mm across the entire speed range, a nd its 
+robustness is better than the benchmark model. 
+ 
+Figure 2. Tool wear prediction curve (actual value vs. predicted values of 
+each model). 
+ 
+Figure 3. The comparison of mean absolute error at different cutting speeds. 
+Figure 4 compares the resource utilization of edge nodes. 
+The horizontal axis represents the model type, and the vertical 
+axis represents the resource utilization rate (%). The CPU and 
+GPU utilization rates of A -LWDRL are 28% and 42%, 
+respectively, which are far lower than the 56% and 6 8% of 
+the traditional DRL model, fully demonstrating its edge 
+adaptation advantage. In summary, the experimental results 
+comprehensively verify the comprehensive performance 
+advantages of the A- LWDRL algorithm in prediction 
+108
+Authorized licensed use limited to: Vasavi College of Engineering. Downloaded on August 11,2026 at 07:49:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+===== PAGE 5 =====
+accuracy, real-time performance, and edge adaptation from 
+both quantitative and qualitative perspectives, providing an 
+efficient and feasible technical solution for online prediction 
+of CNC machine tool wear. 
+ 
+Figure 4. Comparison of CPU/GPU resource utilization at edge nodes. 
+IV. CONCLUSION 
+ The A-LWDRL tool wear prediction model proposed in 
+this paper achieves an effective balance in prediction 
+accuracy, real -time performance, and edge resource 
+adaptability through the synergistic innovation of adaptive 
+edge data preprocessing, attention feature selection, 
+lightweight network design, and dynamic hierarchical reward 
+mechanism. Experimental results show that the model 
+exhibits optimal comprehensive performance on both public 
+and real -world datasets, significantly improving prediction 
+accuracy and reducing resource consumption and inference 
+latency compared to traditional models. This fully verifies the 
+feasibility and superiority of the fusion application of deep 
+reinforcement learning and edge data processing. The 
+limitations of this research lie in the fact that the experimental 
+dataset mainly focuses on scenarios where WC -Co tools cut 
+Inconel 718 alloy and 45 steel. Its adaptability to complex and 
+extreme working conditions such as high -speed cutting and 
+dry cutting has not been fully verifi ed. Furthermore, the 
+adaptive adjustment coefficients and reward mechanism 
+parameters in the model still rely on experience and data 
+training optimization, lacking theoretical derivation support. 
+Future research directions could extend to cross -condition 
+prediction scenarios for multi -material cutting tools and 
+multi-type workpieces, introducing transfer learning to 
+improve model generalization capabilities; further optimizing 
+attention mechanisms and lightweight network structures, 
+and combining interpreta ble AI technology to enhance the 
+transparency of model decisions; exploring the fusion path of 
+digital twins and real- time monitoring data to construct an 
+intelligent management and control system for the entire tool 
+lifecycle, achieving the integration of  wear prediction and 
+maintenance decisions. 
+ 
+REFERENCES 
+[1] Wang Xin, Liao Xiaoping, Liu Shusheng, Qin Ban, & Lu Juan. 
+Research on deep forest method for predicting tool wear state under 
+multiple working conditions under multi -sensor fusion. Journal of 
+Instrumentation, vol. 44, pp. 263-272, September 2023. 
+[2] Li Yongqiang, Gao Ganggang, Lu Xuebin, Wang Shanglong, & Zhang 
+Rong. Review on the application and development of surrogate model 
+in CNC machine tool field. Mechanical Research and Application, vol. 
+38, pp. 174-180, March 2025. 
+[3] Cheng Jiawen, Zhang Chaoyong, & Luo Min. Tool wear prediction 
+based on multi -sensor information fusion of stacked LSTM with 
+attention mechanism. Industrial Engineering, vol. 27, pp. 64-77, March 
+2024. 
+[4] Li Yongqiang, Chen Yanli, Wu Dongxi a, Xing Guanmei, & Liu 
+Wenjing. Review on the application and development of digital 
+engineering in CNC machine tools. Mechanical Research and 
+Application, vol. 38, pp. 157-163, April 2025. 
+[5] Shi Lichen, Shi Weichun, Wang Haitao, Li Jinyang, & Liu Yaxiong. 
+Research on tool wear prediction method based on DRSN- BiLSTM 
+model. Journal of Mechanical Engineering, vol. 60, pp. 66- 74, 
+December 2024. 
+[6] Wu Fei, Nong Haoye, & Ma Chenhao. Tool wear prediction method 
+based on particle swarm optimization algorithm -long short  time 
+memory model. Journal of Jilin University (Engineering Science), vol. 
+53, pp. 989-997, April 2023. 
+[7] Bo Li. Research on the application of intelligent manufacturing 
+technology in CNC machining process optimization. Engineering 
+Construction, vol. 8, pp. 75-77, March 2025. 
+[8] Liu Yuekai, Wang Tianyang, & Chu Fulei. Research on knowledge 
+embedding and diagnosis method of key components of complex 
+rotating machinery based on low- latency interpretable deep learning. 
+Journal of Mechanical Engineering, vol. 60, pp. 107-115, June 2024. 
+[9] Shi Lichen, Tian Heyuan, Dou Weitao, & Yang Jie. Surface machining 
+quality prediction based on RPM and multi -task learning. Automation 
+of Manufacturing, vol. 47, pp. 29-42, October 2025. 
+[10] Wang Runqiong, Song Qinghua, Peng Yezhen, & Liu Zhanqiang. 
+High-performance milling tool condition monitoring based on feature 
+adaptive fusion and ensemble learning. Journal of Mechanical 
+Engineering, vol. 60, pp. 149-158, January 2024. 
+[11] Liu Xianli, Li Xuebing, Ding Mingna, Yue Caixu, Wang Lihui, Liang  
+Yuesheng, & Zhang Bowen. Intelligent control technology for the 
+entire life cycle of cutting tools for intelligent manufacturing. Journal 
+of Mechanical Engineering, vol. 57, pp. 196-219, May 2021. 
+[12] Ding Mingna, Liu Xianli, Yue Caixu, Fan Mengchao, & Gu Hao. Tool 
+design for intelligent manufacturing processes. Preparation and 
+Control Technology. Journal of Mechanical Engineering, vol. 59, pp. 
+429-459, October 2023. 
+[13] Bo Li. Research on Mold Design and Manufacturing Based on Digital 
+Technology. Engineering Construction Technology, vol. 3, pp. 68- 71, 
+April 2025. 
+[14] Wang Qichao, Jin Guangshu, Li Qing, Wang Kai, Yang Zuye, & Wang 
+Hong. Research Status and Prospect of Industrial Edge Computing. 
+Information and Control, vol. 50, pp. 257-274, March 2021. 
+[15] Ju Jiangtang, & Bao Xidan. Application of Artificial Intelligence 
+Technology in Mechanical Design and Manufacturing. Engineering 
+Construction, vol. 8, pp. 80-83, May 2025. 
+[16] Zhou Zude, Yao Bitao, Tan Yuegang, Liu Mingyao, Li Tianliang, & 
+Wei Qin. Analysis and Thinking on the Application of Fiber Optic 
+Sensing in Manufacturing. Journal of Mechanical Engineering, vol. 58, 
+pp. 3-26, April 2022. 
+[17] Zhou Zude, & Yao Bitao. Scientific system and technological 
+architecture of digital manufacturing. Journal of Mechanical 
+Engineering, vol. 59, pp. 126-151, October 2023. 
+ 
+109
+Authorized licensed use limited to: Vasavi College of Engineering. Downloaded on August 11,2026 at 07:49:28 UTC from IEEE Xplore.  Restrictions apply. 

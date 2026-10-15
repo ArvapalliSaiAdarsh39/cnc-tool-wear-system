@@ -1,0 +1,503 @@
+
+
+===== PAGE 1 =====
+Online Detection of Turning Tool Wear
+Based on Machine Vision
+Xinfeng Dong 1
+Associate Professor
+School of Mechanical and Automation,
+Weifang University,
+Weifang 261061, China
+e-mail: laile_sd@163.com
+Yongsheng Li 1
+Professor
+School of Mechanical and Automation,
+Weifang University,
+Weifang 261061, China;
+Shandong Tianrui Heavy Industry Co., Ltd,
+Weifang 261061, China;
+Shandong Magnetic Suspension Technology Industry
+Research Institute,
+Weifang 261061, China
+e-mail: LYS_Tr@163.com
+To identify the tool wear in real time, this article builds the online
+detection system and proposes an integrated image processing
+method to measure the wear width for ﬂank face of turning tool.
+First, the images of ﬂank face wear are collected by the image
+acquisition system. Second, the collected images are cropped
+near the ﬂank face wear, and the wear area and background for
+the cropped images are separated by k-means clustering algorithm.
+Then, the wear edge is identi ﬁed by the grayscale transformation
+and edge detection algorithm, and the wear width is calculated
+by Hough transformation. Finally, the cutting experiment is
+carried out on MAG HTC200 CNC lathe to verify the validity of
+the proposed method, and the results show that the identi ﬁed
+wear width by the proposed method and actual measured wear
+width for ﬂank face of turning tool are in good agreement and
+show the proposed method is effective and have micron scale calcu-
+lation accuracy. [DOI: 10.1115/1.4053919]
+Keywords: wear width, ﬂank face of turning tool, K-means
+clustering algorithm, Hough transform, online detection, machine
+vision
+1 Introduction
+With the applications of sensor technologies in manufacturing
+engineering, the intelligent online detection in manufacturing
+process has been developed rapidly and produce great economic ben-
+eﬁts. As the foundation of modern manufacturing industry, computer
+numerical control (CNC) machine tools are the vital evaluation for
+national whole industry. The detection status in CNC machining
+has an important impact on the machining quality of parts. In the
+metal cutting process, if the wear or breakage of cutting tool is not
+discovered in time, there will be damage of work piece, machine
+tool, or unstable cutting process [ 1–6]. According to the statistics,
+the cost of cutting tool accounts for 3 –12% of the total production
+cost [7], which is not small spending for the production. In addition,
+nearly 20% of nonproduction time is due to tool wear [8]. It has been
+reported that by using sensors instead of mechanical engineer ’ sub-
+jective judgments, the tool cost can be saved more than 40% [ 9].
+The online detection of the cutting tool can be divided into direct
+and indirect detection. The direct measurement refers to manual
+measurement of tool wear when the tool is unloaded from the
+tool holder, or automatic measurement of tool wear by machine
+vision, laser, and so on, where the tool does not need to be unloaded
+from the tool holder. Indirect measurement is the way that machin-
+ing signals are collected during the cutting process, such as cutting
+forces, vibration, and noises, and the tool wear can be judged indi-
+rectly by the signal processing method in which the linear or non-
+linear regression is carried out between tool wear and signal
+characteristics. The disadvantage of indirect detection is that the
+collected signals do not re ﬂect the direct information of tool wear.
+In the last decades, researchers have performed more researches
+on the tool wear and tool life. Kurada and Bradley developed the
+system that is consisted of ﬁber-optic light source and charge
+coupled device (CCD) camera to capture the ﬂank face wear of
+cutting tool [10]. Pfeifer and Wiegers discussed the research progress
+of tool wear detection and machine vision [ 11]. In Ref. [ 12], the
+method of wear detection is presented, in which tool wear was cap-
+tured from a pair of images. In Ref. [ 13], the CCD camera is used to
+measure the wear width for a drilling tool. In Refs. [ 14,15], Devillez
+et al. used 3D images to detect the wear width. Wang et al. developed
+the measurement system for ﬂank face wear based on successive
+image analysis for periodically measuring in milling [ 16]. Wang
+et al. presented an image processing method to measure the ﬂank
+wear width, they ﬁrst used the binary image to obtain the general
+edge points, and then the threshold-independent edge detection
+method was employed for detail detection [ 17]. Huang and cowork-
+ers developed the measurement system for the detection of drilling
+tool wear by CCD camera and microscope, which can calculate the
+wear area, average wear width, and maximum wear width [18]. Cas-
+tejón et al. developed the online monitoring system based on com-
+puter vision to obtain images of ﬂank face, and nine geometrical
+descriptors are used to describe the ﬂank wear [ 19].
+Although more researches have been done for the tool wear
+detection based on machine vision, there are still some problems
+that need to be further studied, such as the feasibility and stability
+of detection system, darkness of light, interference of cutting
+ﬂuid, the correctness, and precision of the image processing
+method, which will affect the ﬁnal detection result.
+In this article, an integrated image processing algorithm is pro-
+posed based on the machine vision detection system in the
+turning process. The wear image of ﬂank face is captured by
+CMOS transducer, which is featured with the microscope head so
+that the wear picture can be enlarged. The collected image is ana-
+lyzed based on the integrated method, and the validity of the pro-
+posed method is proved by the turning experiment.
+2 Theoretical Foundation
+In this article, the ﬂowchart of the integrated image processing
+method is shown in Fig. 1.
+2.1 Image Segmentation and K-Means Clustering
+Algorithm. Image segmentation shows that the image is decom-
+posed into nonoverlapping speci ﬁc regions with unique properties.
+Excellent image segmentation should have the following
+characteristics:
+– The regions are divided by certain characteristics (such as gray
+and texture features), and the internal region is connected and
+has not too many holes.
+– There are signiﬁcant differences for the properties in the neigh-
+boring region segmentation.
+– Zone boundary is apparent.
+1Corresponding authors.
+Contributed by the Computers and Information Division of ASME for publication
+in the J OURNAL OF COMPUTING AND INFORMATION SCIENCE IN ENGINEERING. Manuscript
+received July 2, 2021; ﬁnal manuscript received February 16, 2022; published
+online March 24, 2022. Assoc. Editor: Ehsan T. Esfahani.
+Journal of Computing and Information Science in Engineering OCTOBER 2022, Vol. 22 / 050903-1
+Copyright © 2022 by ASME
+Downloaded from http://asmedigitalcollection.asme.org/computingengineering/article-pdf/22/5/050903/6867810/jcise_22_5_050903.pdf by Vasavi College Of Engineering user on 11 August 2026
+
+
+===== PAGE 2 =====
+Image segmentation has the formalized de ﬁnition: I represents
+the image, H represents the logical predicates, I is divided into n
+decomposed regions Ri with same attributes, i = 1, 2 ，…，n,
+which should meet the following requirements:
+⋃N
+i=1 Ri = I, Ri
+⋂
+Rj = Φ, ∀i, j, i ≠ j
+∀i, j = 1, 2 ... , n, H(Ri) = Ture
+∀i, j, i ≠ j, H(Ri
+⋃
+Rj) = False
+There are numbers of segmentation algorithms. The segmenta-
+tion algorithms generally can be divided into three parts: edge
+detection, threshold processing, and region growing. Other special
+segmentation algorithms are divided into six parts: threshold pro-
+cessing, pixel classi ﬁcation, deep image segmentation, color
+image segmentation, edge detection, and the method based on
+fuzzy sets.
+Considering the practical situation, the K-means clustering algo-
+rithm is used for image segmentation of tool wear in this article. The
+each pixel color of image consists of three different colors in a
+certain percentage, that is, red, green, and blue. By linear or nonlin-
+ear transformation, the hue, saturation, brightness, and other fea-
+tures from the trichromatic color image can be calculated.
+Selecting the appropriate color characteristics for the segmenta-
+tion of color image is very valuable research. Zhang and Xu pro-
+posed an effective feature set of orthogonal color { I1, I2, I3}a s
+follows [20]:
+I1 = R + G + B3
+I2 = R − B2 or I2 = B − R2
+I3 = 2G − R − B4
+(1)
+These coordinates have been used for color image segmentation:
+(R, G, B), (X, Y, I), (L*, a*, b*), (L*, u*, v*).
+First, the mean of each category is calculated by K-means clus-
+tering algorithm, and the mean of the new generation of pixel reclas-
+siﬁcation is obtained (the average pixel is included in the most
+recent class). Then, the previous steps are repeated by the generated
+class. On the one hand, clustering requires the initial segmentation
+with initial parameters that have large in ﬂuence on the ﬁnal
+classiﬁcation. On the other hand, the associated spatial information
+is not considered.
+Taking an arbitrary K value vector as the initial cluster center and
+setting the vector as Y 1(l ), Y2(l ), … Yk(l ), the loop process is set as
+n and the initial value is set to 1.
+All vector X are classiﬁed by Eq. (2). The vector set {X} belongs
+to the cluster center Y 1(l ), Y 2(l ), … Yk(n), and the corresponding
+subset is de ﬁned as S 1(l), S 2(l ), … Sk(n).
+dl = min{dj} /shortrightarrow X ∈ Sl(n), (j ∈ Nk ), Nk ≡
+Δ
+(1, 2, ... , K) (2)
+where dj is the distance between X and Yj(n)d eﬁned by the follow-
+ing equation:
+dj ≡
+Δ
+‖X − Yj(n)‖ (3)
+The center of new cluster Y l(n+1) is calculated by the following
+equation:
+Yl(n + 1) = 1Nl ∑X∈Sl (n) X (4)
+where Nl is the element number in set S l (n), and Y l(n+1) is the
+average value of X. For all clusters, the process ends when the
+next formula holds, otherwise the process will return to Eq. (2)
+and the process has to be repeated [ 21], as shown in the following
+equation:
+Yl(n + 1) = Yl(n), l ∈ Nk (5)
+2.2 Grayscale Transformation and Edge Detection. The
+color image is transformed to the grayscale image in the process,
+which is known as gray image processing. Each pixel of color
+image is set to R, G, B three components, and there are 255 different
+values for each component. The pixel can ﬂuctuate more than 16
+million (255 × 255 × 255) color ranges. The gray image has three
+kinds of R, G, B, including 255 spaces pixel ranges. Generally,
+color image is transformed into gray image to easier calculation.
+The description of grayscale image is the same with color images,
+which still re ﬂects the overall and local distribution, chrominance,
+and luminance characteristics. Grayscale image processing can be
+used by two methods.
+The ﬁrst method is to determine the average value of each pixel
+of R, G, B, and then the average value is assigned to the three com-
+ponents of the pixel.
+The second method is based on the Y, U, V color space. The
+physical meaning of component Y is the point luminance, which
+reﬂects the brightness level. According to the RGB changes and
+Y, U, V color space, the relationship between luminance Y and
+R, G, B can be established:
+Y = 0.3R + 0.59G + 0.11B (6)
+By using the luminance as the value in the gray value image, the
+second method is selected.
+In the image, the boundary region is represented as the connec-
+tion that indicates the end and the beginning of the feature region.
+The characteristics or attributes of different regions are different.
+The edge detection achieves its function by difference characteris-
+tics between the object and the background of the image. The dif-
+ferences include gray, color, or texture features. The edge
+detection actually detects the position where the image features
+change. There are many different algorithms that have different cal-
+culation processes.
+In this article, the “robert” algorithm is used, which is a gradient
+calculation method based on difference. The gradient represents the
+intensity of edge, and the direction of gradient is perpendicular to
+the trend of edge. This algorithm is usually expressed by following
+Fig. 1 The ﬂowchart of image processing
+050903-2 / Vol. 22, OCTOBER 2022 Transactions of the ASME
+Downloaded from http://asmedigitalcollection.asme.org/computingengineering/article-pdf/22/5/050903/6867810/jcise_22_5_050903.pdf by Vasavi College Of Engineering user on 11 August 2026
+
+
+===== PAGE 3 =====
+equation:
+G[f(x, y)] = {[
+/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129 /NameMe.129
+f(x, y)
+√
+−
+/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129
+f(x + 1, y + 1)
+√
+]2 + [ /NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129f(x + 1, y)√
+−
+/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129/NameMe.129
+f(x, y + 1)
+√
+]2}1/2 (7)
+where f( x, y ) represents the input image with integer pixel
+coordinates.
+2.3 Hough Transform. The Hough transform is the feature
+extraction method to detect lines of image, which has been
+widely used in image analysis, computer vision, and digital image
+processing. It has many signi ﬁcant advantages including robust to
+the extraneous noise due to the line integration operation. The
+polar parameterization of the line can be expressed in the time fre-
+quency domain, as follows:
+x cos θ + y sin θ = ρ (8)
+where ρ and θ are the distance and angle of the normal vector to
+the original line, respectively, as shown in Fig. 2. The Hough
+transform associates each point ( xi, yi), with the sinusoid in the
+(ρ, θ) domain. If N points are concentrated along the straight
+line in the time frequency domain, they correspond to N sinusoidal
+curves and intersect at the same point in the ( ρ, θ) domain. The
+integration along the line produces the maximum, and its coordi-
+nates in the ( ρ, θ) domain are directly related to the parameters of
+the lines. The Hough transform converts the dif ﬁcult global detec-
+tion problem in image space into the more easily local peak detec-
+tion problem in the parameter space. The calculation process is as
+follows:
+– Quantifying the ( ρ, θ) domain, and obtaining the 2D matrix M
+(ρ, θ) that the 2D array is an accumulator, and the initial value
+is set as 0, M ( ρ, θ) = 0.
+– For each point on boundary, all the quanti ﬁed values are sub-
+stituted into the ﬁrst step, obtaining the corresponding values
+and adding 1 to accumulator, M ( ρ, θ) = M( ρ, θ) +1.
+– Calculating all the ( xi, yi) and analyzing the M ( ρ, θ), if M >T,
+the signiﬁcant line is de ﬁned. The ( ρ, θ) is the ﬁtting parame-
+ters, and T is a nonnegative integer threshold, which can be
+acquired in the image by the priori knowledge.
+– Deﬁning the line in the picture by ( ρ, θ) and ( xi, yi), and the
+broken part is connected [ 22].
+3 Experiment
+3.1 Detection System and Material. The online detection
+system consists of hardware and software components. Hardware
+system includes CMOS camera, LED light, computer, and other
+components. The ﬂank face of the turning tool is picturized by
+the system, and then transferred to a computer. The architecture
+of the system is shown in Fig. 3.
+The CMOS camera and LED light source are ﬁxed on MAG
+HTC200 CNC lathe by magnetic bracket. The install has no
+effect on the movement of each coordinate axis of machine tool
+[11]. The shaft is machined on the CNC lathe as shown in Fig. 4.
+To change the dark machining environment, the AFT ring light is
+used.
+The CMOS camera is used as photographed equipment. When
+CMOS camera is installed on the machine tool, the distance
+between the camera and the cutting tool should be adjusted to
+acquire clear image. When taking pictures, the cutting tool is
+moved to the ﬁxed shooting position by CNC lathe [ 19]. By adjust-
+ing the camera ’s magnetic bracket, the camera lens optical axis is
+adjusted perpendicular to the ﬂank face of the cutting tool. These
+hardware parameters are presented in Table 1. To ensure the
+quality of collected images and accuracy of detection systems, the
+following two questions should be considered: the ﬁxed mounting
+positions of bracket and camera and the cutting tool location
+when capturing image.
+Fig. 2 The illustration of Hough transform: coordinate plan and
+Hough plan
+Fig. 3 Online detection system for ﬂank face wear of turning
+tool
+Fig. 4 MAG HTC200 CNC lathe
+Table 1 Some hardware parameters
+Equipment Speci ﬁcations
+CNC lathe MAG HTC200
+Cutting tool Sandvik CoroTurn HP
+AM413T Dino-Lite Pro
+Dino-Lite Digital Microscope
+Interface: USB 2.0
+Product Resolution: 1.3 M pixels. (SXGA)
+Magniﬁcation Rate: 20× ∼ 50×, 200×
+AFT-RL8548-65 LED
+ring light
+Inside diameter: 65.0 mm/48.0 mm;
+Outside diameter: 77.0 mm/85.0 mm
+Computer Lenovo
+Journal of Computing and Information Science in Engineering OCTOBER 2022, Vol. 22 / 050903-3
+Downloaded from http://asmedigitalcollection.asme.org/computingengineering/article-pdf/22/5/050903/6867810/jcise_22_5_050903.pdf by Vasavi College Of Engineering user on 11 August 2026
+
+
+===== PAGE 4 =====
+The software system is developed based on Sec. 2, which can cal-
+culate the mean wear width of ﬂank face of the turning tool. First,
+the image is collected and cropped, and then K-means clustering
+algorithm is used to divide the wear area. Second, the grayscale con-
+version is used, and the wear region of ﬂank face is lined by Hough
+transform algorithm. Finally, the wear width of ﬂank face or the VB
+mean can be calculated automatically.
+3.2 The Processing of Images and the Results. According to
+the aforementioned image processing, three collected images are
+calculated. The tool is measured every 5 min.
+The three original images after cropping are shown in Fig. 5.
+Figure 6 shows the segmentation images calculated by K-means
+clustering algorithm. Figure 7 shows the images processed by gray-
+scale transformation and edge detection. Figure 8 shows the images
+of Hough transformation. Each of parts (a), (b), and (c) of Figs. 5–8
+are the image processing results corresponding to Experiments 1 –3
+respectively.
+In the detection system, the length of each pixel was 0.002 mm,
+which has relative high precision for the calculation of tool wear.
+The pixel numbers between two red lines were calculated to identify
+the actual wear width of ﬂank face [ 18]. The two identi ﬁed straight
+lines of wear area are parallel after Hough transformation because of
+the regular wear sharps of ﬂank face.
+The distance between the two lines is the mean wear width of the
+ﬂank face (VB mean).The ﬁnal results are presented in Table 2.
+Fig. 5 Three original images of tool ﬂank wear in three
+experiments
+Fig. 6 The images after wear region segmentation by K-means
+clustering algorithm
+Fig. 7 The images processed by grayscale transformation and
+edge detection
+Fig. 8 The Hough transformation images
+Table 2 The ﬁnal identiﬁed width for wear area
+VB mean Image a Image b Image c
+The pixels of the width in wear
+region
+32 43 48
+The identiﬁed width 0.064 mm 0.086 mm 0.096 mm
+Fig. 9 The manual measured width of the wear area calculated
+by Dino Capture 2.0
+Table 3 The comparison between automatic identi ﬁcation and
+manual test
+VB mean Image a Image b Image c
+The identiﬁed width 0.064 mm 0.086 mm 0.096 mm
+The width obtained by
+Dino Capture 2.0
+0.062 mm 0.089 mm 0.093 mm/0.097 mm
+050903-4 / Vol. 22, OCTOBER 2022 Transactions of the ASME
+Downloaded from http://asmedigitalcollection.asme.org/computingengineering/article-pdf/22/5/050903/6867810/jcise_22_5_050903.pdf by Vasavi College Of Engineering user on 11 August 2026
+
+
+===== PAGE 5 =====
+4 Experimental Veri ﬁcation
+The CMOS camera used in this research has the support software
+named Dino Capture 2.0, which can be used to manually calculate
+the wear width in image. Therefore, the results can be compared by
+the integrated image processing method with the result obtained
+by the Dino Capture 2.0 software, and the results ( (a), ( b) and (c)
+are respectively the image processing results corresponding to
+Experiments 1 –3) are shown in Fig. 9. The data are presented in
+Table 3. It can be found that the identi ﬁed results are in good agree-
+ment with the manual test results.
+5 Conclusions
+In this article, the online detection system of ﬂank face wear
+based on machine vision is designed, and an integrated image pro-
+cessing algorithm to identify the ﬂank face wear is proposed. The
+integrated image processing method is veri ﬁed by experiment. In
+the actual production, the tool can be replaced according to the
+actual state of tool wear. The research advantages of this research
+can be summarized as follows:
+– The system is simple and is easy to be built.
+– The calculation time is short and has high calculation
+efﬁciency.
+– Micron-level accuracy can be achieved by the system.
+The factors affecting the accuracy of the system and the solutions
+are as follows:
+– When taking photos, the verticality between the optical axis of
+CMOS camera with the ﬂank face of cutting tool will affect the
+system accuracy. To reduce the error caused by the camera
+angle, we need to adjust the CMOS camera, and in the mea-
+surement processing, the position of the tool should be
+adjusted accurately.
+– The effect of image noise. A very important issue of computer
+image processing is the image noise. All captured images will
+be introduced more or less noise, which impact the images
+quality. Therefore, the image processes requires using the ﬁl-
+tering methods to reduce image noise in this research and
+the median ﬁlter operation is used to remove redundant pixel
+noise of the binary image, which improves the accuracy of
+the system.
+Acknowledgment
+Research interests of Xinfeng Dong are stability in machining
+process, state detection in machining process, and magnetic levita-
+tion power equipment technology. Research interests of Yongsheng
+Li are manufacturing of rock drilling equipment and magnetic lev-
+itation power equipment technology.
+Funding Data
+ This study is supported respectively by focus on research and
+development plan in Shandong province (Soft Science) (No.
+2021RKY02032), the “Excellent Doctoral Program of
+Weifang University, ”“ Research start-up funds of Weifang
+University.”
+Conﬂict of Interest
+There are no con ﬂicts of interest.
+References
+[1] Dong, X., Shen, X., and Fu, Z., 2021, “Stability Analysis in Turning With
+Variable Spindle Speed Based on the Reconstructed Semi-Discretization
+Method,” Int. J. Adv. Manuf. Technol. , 117, pp. 3393 –3403.
+[2] Dong, X., and Qiu, Z., 2020, “Stability Analysis in Milling Based on Updated
+Numerical Integration Method, ” Mech. Syst. Signal Process. , 137, pp. 1 –17.
+[3] Dong, X., and Zhang, W., 2019, “Chatter Suppression Analysis in Milling
+Process With Variable Spindle Speed Based on the Reconstructed
+Semi-Discretization Method, ” Int. J. Adv. Manuf. Technol. , 105(5–6),
+pp. 2021 –2037.
+[4] Dong, X., and Zhang, W., 2017, “Stability Analysis in Milling of the Thin Walled
+Part Considering Multiple Variables of Manufacturing Systems, ” Int. J. Adv.
+Manuf. Technol. , 89(1), pp. 515 –527.
+[5] Dong, X., and Zhang, W., 2017, “Chatter Identi ﬁcation in Milling of the
+Thin-Walled Part Based on Complexity Index, ” Int. J. Adv. Manuf. Technol. ,
+91(9), pp. 3327 –3337.
+[6] Dong, X., Zhang, W., and Deng, S., 2016, “The Reconstruction of a
+Semi-Discretization Method for Milling Stability Prediction Based on Shannon
+Standard Orthogonal Basis, ” Int. J. Adv. Manuf. Technol. , 85(5–8), pp. 1501 –
+1511.
+[7] Teti, R., 2002, “Machining of Composite Materials, ” CIRP Ann. —Manuf.
+Technol., 51(2), pp. 611 –634.
+[8] Kurada, S., and Bradley, C., 1997, “A Review of Machine Vision Sensors for
+Tool Condition Monitoring, ” Comput. Ind. , 34(1), pp. 55 –72.
+[9] Lim, G., 1995, “Tool-Wear Monitoring in Machine Turning, ” J. Mater. Process.
+Technol., 51(1–4), pp. 25 –36.
+[10] Kurada, S., and Bradley, C., 1997, “A Machine Vision System for Tool Wear
+Assessment,” Tribol. Int. , 30(4), pp. 295 –304.
+[11] Pfeifer, T., and Wiegers, L., 2000, “Reliable Tool Wear Monitoring by Optimized
+Image and Illumination Control in Machine Vision, ” Measurement, 28(3),
+pp. 209 –218.
+[12] Niranjan Prasad, K., and Ramamoorthy, B., 2001, “Tool Wear Evaluation by
+Stereovision and Prediction by Arti ﬁcial Neural Network, ” J. Mater. Process.
+Technol., 112(1), pp. 43 –52.
+[13] Kim, J.-H., Moon, D.-K., Lee, D.-W., Kim, J.-S., Kang, M.-C., and Kim, K. H.,
+2002, “Tool Wear Measuring Technique on the Machine Using CCD and
+Exclusive jig,” J. Mater. Process. Technol. , 130–131, pp. 668 –674.
+[14] Devillez, A., Lesko, S., and Mozer, W., 2004, “Cutting Tool Crater Wear
+Measurement With White Light Interferometry, ” Wear, 256(1–2), pp. 56 –65.
+[15] Jurkovic, J., Korosec, M., and Kopac, J., 2005, “New Approach in Tool Wear
+Measuring Technique Using CCD Vision System, ” Int. J. Mach. Tools Manuf. ,
+45(9), pp. 1023 –1030.
+[16] Wang, W., Wong, Y. S., and Hong, G. S., 2005, “Flank Wear Measurement by
+Successive Image Analysis, ” Comput. Ind. , 56(8–9), pp. 816 –830.
+[17] Wang, W. H., Hong, G. S., and Wong, Y. S., 2006, “Flank Wear Measurement by
+a Threshold Independent Method With Sub-Pixel Accuracy, ” Int. J. Mach. Tools
+Manuf., 46(2), pp. 199 –207.
+[18] Su, J. C., Huang, C. K., and Tarng, Y. S., 2006, “An Automated Flank Wear
+Measurement of Microdrills Using Machine Vision, ” J. Mater. Process.
+Technol., 180(1–3), pp. 328 –335.
+[19] Castejón, M., Alegre, E., Barreiro, J., and Hernández, L. K., 2007, “On-Line Tool
+Wear Monitoring Using Geometric Descriptors From Digital Images, ”
+Int. J. Mach. Tools Manuf. , 47(12–13), pp. 1847 –1853.
+[20] Zhang, H., and Xu, D., 2006, “Fusing Color and Texture Features for Background
+Model,” Third International Conference on Fuzzy Systems and Knowledge
+Discovery, 4223 (7), pp. 887 –893.
+[21] Qiu, D., and Tamhane, A. C., 2007, “A Comparative Study of the K-Means
+Algorithm and the Normal Mixture Model for Clustering: Univariate Case, ”
+J. Stat. Plann. Inference , 137(11), pp. 3722 –3740.
+[22] Snr, D. E. D., 2000, “Sensor Signals for Tool-Wear Monitoring in Metal Cutting
+Operations—A Review of Methods, ” Int. J. Mach. Tools Manuf. , 40(8),
+pp. 1073 –1098.
+Journal of Computing and Information Science in Engineering OCTOBER 2022, Vol. 22 / 050903-5
+Downloaded from http://asmedigitalcollection.asme.org/computingengineering/article-pdf/22/5/050903/6867810/jcise_22_5_050903.pdf by Vasavi College Of Engineering user on 11 August 2026
