@@ -449,8 +449,7 @@ with st.sidebar:
     if llm_agent.is_configured:
         st.success("Azure OpenAI: connected", icon="✅")
     else:
-        st.info("Azure OpenAl: offline fallback
-active. See .env.template",icon="ℹ️")
+        st.info(" Azure OpenAl: offline fallback active. See .env.template ",icon="ℹ️")
 
 # ---------------------------------------------------------------------------
 # Resolve the active model tier for this run
